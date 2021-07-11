@@ -1,0 +1,52 @@
+import { glitterParticle } from "./glitterParticle";
+import { Vector3 } from "./MathUtils";
+
+export class glitterCanvas {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  bgColor: string;
+  glitterColors: string[];
+  glitterParticles: glitterParticle[] = [];
+  glitterParticleCount: number;
+  glitterParticleSize: number;
+  tilt: Vector3 = new Vector3(0, 0, 0);
+
+  constructor(canvas: HTMLCanvasElement, particleCount: number, glitterColors?: string[], glitterParticleSize?: number) {
+    this.canvas = canvas;
+    console.log(this.canvas);
+    this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.bgColor = "black";
+    this.glitterColors = glitterColors || ["red", "white", "blue"];
+    this.glitterParticleCount = particleCount;
+    this.glitterParticleSize = glitterParticleSize || 1;
+    this.generateParticles();
+    window.addEventListener("deviceorientation", this.handleOrientation.bind(this));
+  }
+  generateParticles() {
+    for (let i = 0; i < this.glitterParticleCount; i++) {
+      const x = Math.random() * this.width;
+      const y = Math.random() * this.height;
+      const randColor = this.glitterColors[Math.floor(Math.random() * this.glitterColors.length)];
+      this.glitterParticles.push(new glitterParticle(this.ctx, x, y, 0, randColor, this.glitterParticleSize, this.tilt.x));
+    }
+  }
+  render() {
+    this.ctx.fillStyle = this.bgColor;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+    for (const particle in this.glitterParticles) {
+      this.glitterParticles[particle].draw();
+    }
+    window.requestAnimationFrame(this.render.bind(this))
+  }
+  handleOrientation(event: Event) {
+    console.log(event);
+    this.tilt.x = (<any>event).gamma;
+    this.ctx.font = "20px Arial";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText("Tilt: " + this.tilt.x, 10, 30);
+  }
+}
