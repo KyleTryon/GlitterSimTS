@@ -17,9 +17,17 @@ export class glitterParticle {
     this.viewingAngle = viewingAngle;
   }
 
+  get apparentSize() {
+    if (this.viewingAngle - this.tiltX < 1) {
+      return this.size * 3;
+    } else {
+      return this.size;
+    }
+  }
+
   draw() {
     this.ctx.beginPath();
-    this.ctx.rect(this.x, this.y, this.size, this.size);
+    this.ctx.rect(this.x, this.y, this.apparentSize, this.apparentSize);
     this.ctx.fillStyle = this.colorPrimary;
     this.ctx.fill();
     this.ctx.closePath();

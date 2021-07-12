@@ -12,6 +12,7 @@ export class glitterCanvas {
   glitterParticleCount: number;
   glitterParticleSize: number;
   tilt: Vector3 = new Vector3(0, 0, 0);
+  debugArea: HTMLElement;
 
   constructor(canvas: HTMLCanvasElement, particleCount: number, glitterColors?: string[], glitterParticleSize?: number) {
     this.canvas = canvas;
@@ -24,29 +25,35 @@ export class glitterCanvas {
     this.glitterParticleCount = particleCount;
     this.glitterParticleSize = glitterParticleSize || 1;
     this.generateParticles();
+    this.debugArea = document.getElementById("debugArea") as HTMLElement;
+    this.debugArea.textContent = `Gamma: ${this.tilt.x}`;
     window.addEventListener("deviceorientation", this.handleOrientation.bind(this));
   }
   generateParticles() {
     for (let i = 0; i < this.glitterParticleCount; i++) {
       const x = Math.random() * this.width;
       const y = Math.random() * this.height;
+      // random angle between -45 and 45 degrees
+      const angleX = Math.random() * 90 - 45; 
       const randColor = this.glitterColors[Math.floor(Math.random() * this.glitterColors.length)];
-      this.glitterParticles.push(new glitterParticle(this.ctx, x, y, 0, randColor, this.glitterParticleSize, this.tilt.x));
+      this.glitterParticles.push(new glitterParticle(this.ctx, x, y, angleX, randColor, this.glitterParticleSize, this.tilt.x));
     }
   }
   render() {
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
-    for (const particle in this.glitterParticles) {
-      this.glitterParticles[particle].draw();
-    }
+    this.glitterParticles.forEach(Particle => {
+      Particle.viewingAngle = this.tilt.x;
+      Particle.draw();
+    });
+    this.ctx.font = "20px Arial";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText(`Tilt: ${this.tilt.x}`, 50, 50)
     window.requestAnimationFrame(this.render.bind(this))
   }
   handleOrientation(event: Event) {
-    console.log(event);
     this.tilt.x = (<any>event).gamma;
-    this.ctx.font = "20px Arial";
-    this.ctx.fillStyle = "white";
-    this.ctx.fillText("Tilt: " + this.tilt.x, 10, 30);
+    console.log(this.tilt.x);
+    this.debugArea.textContent = `Gamma: ${this.tilt.x}`;
   }
 }
